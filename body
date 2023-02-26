@@ -1,0 +1,35 @@
+import telegram
+import requests
+from bs4 import BeautifulSoup
+
+# Set up your bot token and chat id
+bot_token = "your_bot_token"
+chat_id = "your_chat_id"
+
+# Initialize the bot
+bot = telegram.Bot(token=bot_token)
+
+# Define a function to scrape news articles from a website
+def get_news():
+    url = "https://www.bbc.com/news"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    articles = soup.find_all('h3', class_='gs-c-promo-heading__title')
+    news = []
+    for article in articles:
+        news.append(article.text.strip())
+    return news
+
+# Define a function to send news updates to the chat
+def send_news():
+    news = get_news()
+    if len(news) > 0:
+        message = "Here are the latest news headlines:\n\n"
+        for n in news:
+            message += "• " + n + "\n"
+        bot.send_message(chat_id=chat_id, text=message)
+    else:
+        bot.send_message(chat_id=chat_id, text="No news found.")
+
+# Call the send_news function to send news updates to the chat
+send_news()
